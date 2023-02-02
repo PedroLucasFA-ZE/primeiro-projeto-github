@@ -1,0 +1,97 @@
+import React, {useState, useEffect, useMemo, useRef} from 'react';
+import AsyncStorage from '@react-native-community/async-storage';
+import{
+StyleSheet,
+View,
+Platform,
+Text,
+Animated,
+TouchableOpacity,
+TextInput,
+} from 'react-native';
+
+
+export default function App(){ 
+ 
+  const [nome, setNome] = useState('');
+  const [input, setInput] = useState('');
+  const nomeInput = useRef(null);
+  
+  useEffect(() =>{
+    async function getStorage(){
+      const nomeStorage = await AsyncStorage.getItem('nomes');
+      if(nomeStorage !== null){
+        setNome(nomeStorage);
+      }
+    }
+    getStorage();
+
+  },[nome]);
+
+  useEffect(() => {
+
+    async function saveStorage(){
+      await AsyncStorage.setItem('nomes', nome);
+    }
+
+  }, [nome])
+
+  function alteraNome(){
+    setNome(input);
+    setInput('');
+  }
+
+  function novoNome(){
+    nomeInput.current.focus();
+  }
+
+
+  const letrasNome = useMemo(()=>{
+    console.log('Mudou Letra');
+    return nome.length;
+  }, [nome]);
+
+  return(
+    <View style={styles.container}>
+      
+      <TextInput
+      placeholder="Seu Nome..."
+      value={input}
+      onChangeText={(texto) => setInput(texto)}
+      ref={nomeInput}
+      />
+
+      <TouchableOpacity style={styles.botao} onPress={alteraNome}>
+        <Text style={styles.bntText}>Altera Nome</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.texto}>{nome}</Text>
+
+      <Text>Tem {letrasNome} letras.</Text>
+
+      <TouchableOpacity onPress={novoNome}>
+        <Text>Novo Nome</Text>
+      </TouchableOpacity>
+
+    </View>
+  );
+  
+}
+
+const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    marginTop: 15,
+  },
+  texto:{
+    color: '#000',
+    fontSize: 35,
+  },
+  botao:{
+    backgroundColor: '#222',
+    alignItems: 'center',
+  },
+  bntText:{
+    color: '#FFF'
+  },
+});
